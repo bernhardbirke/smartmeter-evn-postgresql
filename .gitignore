@@ -1,5 +1,5 @@
 #specific files to ignore
-
+smartmeter-evn-postgrSQL.code-workspace
 
 #specific folders to ignore
 /SmartMeterEVNSagemcom-T210-D
