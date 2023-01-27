@@ -4,7 +4,6 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from binascii import unhexlify
 import sys
 import string
-import paho.mqtt.client as mqtt
 from gurux_dlms.GXDLMSTranslator import GXDLMSTranslator
 from bs4 import BeautifulSoup
 from Cryptodome.Cipher import AES
