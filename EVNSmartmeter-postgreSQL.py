@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 from Cryptodome.Cipher import AES
 from time import sleep
 from gurux_dlms.TranslatorOutputType import TranslatorOutputType
+# load postgreSQL database information as a module
+from postgresql_tasks import insert_smartmeter
 # load environment variables (evn_schluessel)
 import os
 from dotenv import load_dotenv
@@ -17,14 +19,8 @@ load_dotenv()
 # EVN Schlüssel eingeben zB. "36C66639E48A8CA4D6BC8B282A793BBB"
 evn_schluessel = os.getenv("EVN_SCHLUESSEL")
 
-# MQTT Verwenden (True | False)
-useMQTT = False
-
-# MQTT Broker IP adresse Eingeben ohne Port!
-mqttBroker = "192.168.1.10"
-mqttuser = ""
-mqttpasswort = ""
-mqttport = 1883
+# PostgreSQL Verwenden (True | False)
+usePostgreSQL = True
 
 # Comport Config/Init
 comport = "/dev/ttyUSB0"
@@ -68,17 +64,6 @@ units = {
 }
 
 
-# MQTT Init
-if useMQTT:
-    try:
-        client = mqtt.Client("SmartMeter")
-        client.username_pw_set(mqttuser, mqttpasswort)
-        client.connect(mqttBroker, mqttport)
-    except:
-        print("Die Ip Adresse des Brokers ist falsch!")
-        sys.exit()
-
-
 tr = GXDLMSTranslator(TranslatorOutputType.SIMPLE_XML)
 serIn = serial.Serial(port=comport,
                       baudrate=2400,
@@ -88,8 +73,8 @@ serIn = serial.Serial(port=comport,
                       )
 
 
-while 1:
-    sleep(4.7)
+while True:
+    sleep(14.7)
     daten = recv(serIn)
     if daten != '':
         daten = daten.hex()
@@ -105,17 +90,6 @@ while 1:
     init_vector = unhexlify(systemTitel + frameCounter)
     cipher = AES.new(encryption_key, AES.MODE_GCM, nonce=init_vector)
     apdu = cipher.decrypt(frame).hex()
-
-    # MQTT
-    if useMQTT:
-        connected = False
-        while not connected:
-            try:
-                client.reconnect()
-                connected = True
-            except:
-                print("Lost Connection to MQTT...Trying to reconnect in 2 Seconds")
-                time.sleep(2)
 
     try:
         xml = tr.pduToXml(apdu,)
@@ -205,21 +179,11 @@ while 1:
             print()
             print()
 
-        # MQTT
-        if useMQTT:
-            client.publish("Smartmeter/WirkenergieP", WirkenergieP)
-            client.publish("Smartmeter/WirkenergieN", WirkenergieN)
-            client.publish("Smartmeter/MomentanleistungP", MomentanleistungP)
-            client.publish("Smartmeter/MomentanleistungN", MomentanleistungN)
-            client.publish("Smartmeter/Momentanleistung",
-                           MomentanleistungP - MomentanleistungN)
-            client.publish("Smartmeter/SpannungL1", SpannungL1)
-            client.publish("Smartmeter/SpannungL2", SpannungL2)
-            client.publish("Smartmeter/SpannungL3", SpannungL3)
-            client.publish("Smartmeter/StromL1", StromL1)
-            client.publish("Smartmeter/StromL2", StromL2)
-            client.publish("Smartmeter/StromL3", StromL3)
-            client.publish("Smartmeter/Leistungsfaktor", Leistungsfaktor)
+        # PostgreSQL
+        if usePostgreSQL:
+            insert_smartmeter(WirkenergieP, WirkenergieN, MomentanleistungP, MomentanleistungN,
+                              SpannungL1, SpannungL2, SpannungL3, StromL1, StromL2, StromL3, Leistungsfaktor)
+
     except BaseException as err:
         print("Fehler: ", format(err))
         continue

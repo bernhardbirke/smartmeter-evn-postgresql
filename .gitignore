@@ -1,9 +1,9 @@
 #specific files to ignore
 smartmeter-evn-postgrSQL.code-workspace
+database.ini
 
 #specific folders to ignore
-/SmartMeterEVNSagemcom-T210-D
-/evn
+/evn/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
