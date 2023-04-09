@@ -10,7 +10,7 @@ def create_table_smartmeter():
         """
         CREATE TABLE smartmeter (
             data_id SERIAL PRIMARY KEY,
-            created_on TIMESTAMP NOT NULL,
+            time TIMESTAMP NOT NULL,
             wirkenergie_p FLOAT4,
             wirkenergie_n FLOAT4,
             momentanleistung_p FLOAT4,
@@ -46,7 +46,7 @@ def create_table_smartmeter():
 
 def insert_smartmeter(WirkenergieP, WirkenergieN, MomentanleistungP, MomentanleistungN, SpannungL1, SpannungL2, SpannungL3, StromL1, StromL2, StromL3, Leistungsfaktor):
     """ insert a new data row into the smartmeter table """
-    sql = """INSERT INTO smartmeter(created_on, wirkenergie_p, wirkenergie_n, momentanleistung_p, momentanleistung_n, spannung_l1, spannung_l2, spannung_l3, strom_l1, strom_l2, strom_l3, leistungsfaktor)
+    sql = """INSERT INTO smartmeter(time, wirkenergie_p, wirkenergie_n, momentanleistung_p, momentanleistung_n, spannung_l1, spannung_l2, spannung_l3, strom_l1, strom_l2, strom_l3, leistungsfaktor)
             VALUES(NOW()::TIMESTAMP, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING data_id;"""
     conn = None
     data_id = None

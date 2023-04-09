@@ -20,7 +20,7 @@ https://www.postgresqltutorial.com/postgresql-getting-started/install-postgresql
 
 Log in to the PostgreSQL database server using any client tool such as pgAdmin or psql.
 
-Create a postgreSQL Userusing the corresponding commands:
+Create a postgreSQL User using the corresponding commands:
 CREATE ROLE name_of_user
 CREATEDB
 LOGIN
@@ -31,6 +31,11 @@ use the following statement to create a new database named smartmeter in the Pos
 CREATE DATABASE smartmeter;
 
 ### Connect to your database
+
+switch over to the postgres role using:
+sudo -i -u postgres
+
+then start psql.
 
 A database.ini file has to be added to the working directory containing the following specifications:
 [postgresql]
