@@ -26,7 +26,7 @@ usePostgreSQL = True
 comport = "/dev/ttyUSB0"
 
 # Aktulle Werte auf Console ausgeben (True | False)
-printValue = True
+printValue = False
 
 
 # Holt Daten von serieller Schnittstelle
