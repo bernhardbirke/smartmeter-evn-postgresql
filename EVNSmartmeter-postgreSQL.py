@@ -79,7 +79,7 @@ while True:
     if daten != '':
         daten = daten.hex()
     if (daten == '' or daten[0:8] != "68010168"):
-        print("Invalid Start Bytes... waiting")
+        print(f"Invalid Start Bytes... waiting at {time.ctime()}")
         continue
     systemTitel = daten[22:38]
     frameCounter = daten[44:52]

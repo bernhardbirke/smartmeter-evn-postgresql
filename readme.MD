@@ -51,3 +51,41 @@ The config.py file loads this information, which is then used in postgresl_tasks
 The python routine to connect to the smartmeter and read the data is based on Michael Reitbauers work.
 Further explanations can be found here:
 https://www.michaelreitbauer.at/sagemcom-t210-d-auslesen-smart-meter-evn/
+
+### start the file
+
+using: python3 EVNSmartmeter-postgreSQL.py in the project directory.
+
+### troubleshooting postgres
+
+Check if pg_lsclusters is running or down.
+
+```
+pg_lsclusters
+```
+
+if the main cluster is down, check:
+
+```
+systemctl status postgresql@13-main.service
+```
+
+if the error is something like
+
+```
+19:55:40.429 CEST [124777] FATAL:  data directory "/var/lib/postgresql/13/main" has invalid permissions
+ 19:55:40.429 CEST [124777] DETAIL:  Permissions should be u=rwx (0700) or u=rwx,g=rx (0750).
+could not start server
+```
+
+Reset Permissions:
+
+```
+sudo chmod -R 0700 /var/lib/postgresql/13/main
+```
+
+Then restart the cluster:
+
+```
+sudo pg_ctlcluster 13 main start
+```
