@@ -11,6 +11,9 @@ from Cryptodome.Cipher import AES
 from time import sleep
 import xml.etree.ElementTree as ET
 import time
+# load postgreSQL database information as a module
+from postgresql_tasks import insert_smartmeter
+# load environment variables (evn_schluessel)
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -32,7 +35,7 @@ if not os.access(configFile, os.R_OK):
 config = json.load(open(configFile))
 
 # Überprüfung ob alle Daten in der Config vorhanden sind
-neededConfig = ['port', 'baudrate', 'printValue', 'useMQTT', 'mqttbrokerip', 'mqttbrokerport', 'mqttbrokeruser', 'mqttbrokerpasswort', 'useInfluxdb', 'influxdbip', 'influxdbport']
+neededConfig = ['port', 'baudrate', 'printValue', 'usePostgres']
 for conf in neededConfig:
     if conf not in config:
         print(conf + ' Fehlt im Configfile!')
@@ -45,22 +48,11 @@ key = os.getenv("EVN_SCHLUESSEL")
 #Aktulle Werte auf Console ausgeben (True | False)
 printValue = config['printValue']
 
-#MQTT Verwenden (True | False) und Grundeinstellungen
-useMQTT = config['useMQTT']
-mqttBroker = config['mqttbrokerip']
-mqttport = config['mqttbrokerport']             #1883 ist der Standard Port
-mqttuser =config['mqttbrokeruser']              #wenn kein User verwendet wird leer lassen ""
-mqttpasswort = config['mqttbrokerpasswort']     #wenn kein Passwort verwendet wird leer lassen ""
-
+#Postgresql Verwenden (True | False)
+usePostgreSQL = config['usePostgres']
 
 #Comport Config/Init
 comport = config['port']
-
-#InfluxDB Config/init
-useinfluxdb = config['useInfluxdb']
-influxdbhost = config['influxdbip']
-influxdbport = config['influxdbport']
-influxdbdatenbank = 'SmartMeter'
 
 tr = GXDLMSTranslator()
 ser = serial.Serial( port=comport,
@@ -68,29 +60,7 @@ ser = serial.Serial( port=comport,
          bytesize=serial.EIGHTBITS,
          parity=serial.PARITY_NONE,
          stopbits=serial.STOPBITS_ONE
-)
-
-#MQTT Init
-if useMQTT:
-    import paho.mqtt.client as mqtt
-    try:
-        client = mqtt.Client("SmartMeter")
-        client.username_pw_set(mqttuser, mqttpasswort)
-        client.connect(mqttBroker, mqttport)
-    except:
-        print("Die Ip Adresse des Brokers ist falsch!")
-        sys.exit()
-
-if useinfluxdb:
-    from influxdb import InfluxDBClient
-    try:
-        clientinfluxdb = InfluxDBClient(host=influxdbhost, port=influxdbport, database=influxdbdatenbank)
-    except Exception as err:
-        print("Kann nicht mit InfluxDB verbinden!")
-        print()
-        print("Fehler: ", format(err))
-        sys.exit()
-    
+)  
 
 # Werte im XML File
 octet_string_values = {}
@@ -122,9 +92,9 @@ while True:
     frameCounter = daten[44:52]
     frame = daten[52:12+frameLen*2]
     if mbusstart[0:2] == "68" and mbusstart[2:4] == mbusstart[4:6] and mbusstart[6:8] == "68" :
-        print("Daten ok")
+        print(f"Daten ok ({time.ctime()})")
     else:
-        print(f"wrong M-Bus Start, restarting at {time.ctime()}")
+        print(f"wrong M-Bus Start, restarting ({time.ctime()})")
         sleep(2.5)
         ser.flushOutput()
         ser.close()
@@ -165,9 +135,9 @@ while True:
         for element in found_lines:
 
             if element['key'] == "WirkenergieP":
-               WirkenergieP = element['value']/1000
+               WirkenergieP = element['value']
             if element['key'] == "WirkenergieN":
-               WirkenergieN = element['value']/1000
+               WirkenergieN = element['value']
 
             if element['key'] == "MomentanleistungP":
                MomentanleistungP = element['value']
@@ -193,20 +163,7 @@ while True:
 
     except BaseException as err:
         print("Fehler: ", format(err))
-        continue;    
-    
-
-    #MQTT
-    if useMQTT:
-        connected = False
-        while not connected:
-            try:
-                client.reconnect()
-                connected = True
-            except:
-                print("Lost Connection to MQTT...Trying to reconnect in 2 Seconds")
-                time.sleep(2)
-                
+        continue;                  
 
     if printValue:
         now = datetime.now()
@@ -220,76 +177,15 @@ while True:
         print("1.0.71.7.0.255\tStrom L3 (A):\t\t\t "+ str(round(StromL3,2)))
         print("1.0.1.7.0.255\tWirkleistung Bezug [W]: \t "+str(MomentanleistungP))
         print("1.0.2.7.0.255\tWirkleistung Lieferung [W]:\t "+str(MomentanleistungN))
-        print("1.0.1.8.0.255\tWirkenergie Bezug [kWh]:\t "+str(WirkenergieP))
-        print("1.0.2.8.0.255\tWirkenergie Lieferung [kWh]:\t "+str(WirkenergieN))
+        print("1.0.1.8.0.255\tWirkenergie Bezug [Wh]:\t "+str(WirkenergieP))
+        print("1.0.2.8.0.255\tWirkenergie Lieferung [Wh]:\t "+str(WirkenergieN))
         print("-------------\tLeistungsfaktor:\t\t "+str(Leistungsfaktor))
         print("-------------\tWirkleistunggesamt [w]:\t\t " + str(MomentanleistungP-MomentanleistungN))
         
-    #MQTT
-    if useMQTT:
-        client.publish("Smartmeter/WirkenergieBezug",WirkenergieP)
-        client.publish("Smartmeter/WirkenergieLieferung",WirkenergieN)
-        client.publish("Smartmeter/WirkleistungBezug",MomentanleistungP)
-        client.publish("Smartmeter/WirkleistungLieferung",MomentanleistungN)
-        client.publish("Smartmeter/Wirkleistunggesamt",MomentanleistungP - MomentanleistungN)
-        client.publish("Smartmeter/SpannungL1",SpannungL1)
-        client.publish("Smartmeter/SpannungL2",SpannungL2)
-        client.publish("Smartmeter/SpannungL3",SpannungL3)
-        client.publish("Smartmeter/StromL1",StromL1)
-        client.publish("Smartmeter/StromL2",StromL2)
-        client.publish("Smartmeter/StromL3",StromL3)
-        client.publish("Smartmeter/Leistungsfaktor",Leistungsfaktor)
-    try:
-        if useinfluxdb:
-            mytime = int(time.time()*1000000000)
-            json_body = [
-            {
-                "measurement": "Wirkenergie",
-                "fields": {
-                    "Bezug": WirkenergieP,
-                    "Lieferung": WirkenergieN
-                },
-                "time": mytime
-            },
-            {
-                "measurement": "Momentanleistung",
-                "fields": {
-                    "Bezug": MomentanleistungP,
-                    "Lieferung": MomentanleistungN,
-                    "Gesamt": MomentanleistungP-MomentanleistungN
-                },
-                "time": mytime
-            },
-            {
-                "measurement": "Spannung",
-                "fields": {
-                    "L1": SpannungL1,
-                    "L2": SpannungL2,
-                    "L3": SpannungL3,
-                },
-                "time": mytime
-            },
-            {
-                "measurement": "Strom",
-                "fields": {
-                    "L1": StromL1,
-                    "L2": StromL2,
-                    "L3": StromL3,
-                },
-                "time": mytime
-            },
-            {
-                "measurement": "Leistungsfaktor",
-                "fields": {
-                    "value": Leistungsfaktor
-                },
-                "time": mytime
-            }
-            ]
-            clientinfluxdb.write_points(json_body,database=influxdbdatenbank)
-    except BaseException as err:
-        print("Es ist ein Fehler aufgetreten.")
-        print()
-        print("Fehler: ", format(err))
-        sys.exit()
+
+         # PostgreSQL
+    if usePostgreSQL:
+        insert_smartmeter(WirkenergieP, WirkenergieN, MomentanleistungP, MomentanleistungN,
+                              SpannungL1, SpannungL2, SpannungL3, StromL1, StromL2, StromL3, Leistungsfaktor)
+
 
