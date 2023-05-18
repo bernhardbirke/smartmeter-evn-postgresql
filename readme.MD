@@ -3,7 +3,7 @@
 pip install python-dotenv
 
 '''
-pip install psycopg2
+pip install psycopg2 or pip install psycopg2-binary
 '''
 
 ## postgreSQL

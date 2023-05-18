@@ -1,6 +1,7 @@
 #specific files to ignore
 smartmeter-evn-postgrSQL.code-workspace
 database.ini
+EVNSmartmeter-postgreSQL_alt.py
 
 #specific folders to ignore
 /evn/
