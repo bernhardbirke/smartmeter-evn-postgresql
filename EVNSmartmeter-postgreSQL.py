@@ -11,12 +11,16 @@ from Cryptodome.Cipher import AES
 from time import sleep
 import xml.etree.ElementTree as ET
 import time
+import logging
+
 # load postgreSQL database information as a module
 from postgresql_tasks import insert_smartmeter
 # load environment variables (evn_schluessel)
 from dotenv import load_dotenv
 load_dotenv()
 
+#config of logging module (DEBUG / INFO / WARNING / ERROR / CRITICAL)
+logging.basicConfig(level=logging.DEBUG, filename='EVNSmartmeter-postgreSQL.log', encoding='utf-8', filemode='a', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 #Aktuellen Dateipfad finden und mit config.json erweitern
 configFile = os.path.dirname(os.path.realpath(__file__)) + '/config.json' 
@@ -24,11 +28,13 @@ configFile = os.path.dirname(os.path.realpath(__file__)) + '/config.json'
 # Überprüfung ob ein Config Datei vorhanden ist sonst kommt eine Fehlermeldung und beendet das Programm
 if not os.path.exists(configFile):
     print("Kein Configfile gefunden bitte eines anlegen.")
+    logging.error(f'{configFile} was not found', exc_info=True)
     sys.exit(-1)
 
 # Überprüfung ob die Config gelesen werden kann
 if not os.access(configFile, os.R_OK):
     print("ConfigFile " + configFile + " kann nicht gelesen werden!\n\n")
+    logging.error(f'{configFile} can not be read', exc_info=True)
     sys.exit(-2)
 
 # Einlesen der Config
@@ -39,6 +45,7 @@ neededConfig = ['port', 'baudrate', 'printValue', 'usePostgres']
 for conf in neededConfig:
     if conf not in config:
         print(conf + ' Fehlt im Configfile!')
+        logging.error(f'{conf} was not found in Configfile', exc_info=True)
         sys.exit(3)
 
 
@@ -93,8 +100,10 @@ while True:
     frame = daten[52:12+frameLen*2]
     if mbusstart[0:2] == "68" and mbusstart[2:4] == mbusstart[4:6] and mbusstart[6:8] == "68" :
         print(f"Daten ok ({time.ctime()})")
+        logging.info(f'Incomming Data ok')
     else:
         print(f"wrong M-Bus Start, restarting ({time.ctime()})")
+        logging.warning(f'Wrong M-Bus Start, restarting',exc_info=True)
         sleep(2.5)
         ser.flushOutput()
         ser.close()
@@ -126,6 +135,7 @@ while True:
     except BaseException as err:
         #print("APU: ", format(apdu))
         print("Fehler: ", format(err))
+        logging.exception(f'{err}')
         continue;
 
     try:
@@ -163,6 +173,7 @@ while True:
 
     except BaseException as err:
         print("Fehler: ", format(err))
+        logging.exception(f'{err}')
         continue;                  
 
     if printValue:
@@ -185,7 +196,13 @@ while True:
 
          # PostgreSQL
     if usePostgreSQL:
-        insert_smartmeter(WirkenergieP, WirkenergieN, MomentanleistungP, MomentanleistungN,
+        try:
+            insert_smartmeter(WirkenergieP, WirkenergieN, MomentanleistungP, MomentanleistungN,
                               SpannungL1, SpannungL2, SpannungL3, StromL1, StromL2, StromL3, Leistungsfaktor)
+        except BaseException as err:
+            print("Fehler: ", format(err))
+            logging.exception(f'{err}')
+            continue;  
+
 
 

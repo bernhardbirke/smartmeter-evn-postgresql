@@ -56,6 +56,38 @@ https://www.michaelreitbauer.at/sagemcom-t210-d-auslesen-smart-meter-evn/
 
 using: python3 EVNSmartmeter-postgreSQL.py in the project directory.
 
+### run the python file as a service
+
+tutorial from
+https://medium.com/@benmorel/creating-a-linux-service-with-systemd-611b5c8b91d6
+
+Let’s create a file called
+`/etc/systemd/system/smartmeter.service:`
+
+```
+[Unit]
+Description= smartmeter evn postgresql service
+After=multi-user.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=raspi #your user name
+ExecStart=/usr/bin/python3 /whole/path/to/script/EVNSmartmeter-postgreSQL.py
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+#### enable the service via command line
+
+```
+sudo systemctl enable smartmeter.service
+sudo systemctl start smartmeter.service
+```
+
 ### troubleshooting postgres
 
 Check if pg_lsclusters is running or down.
