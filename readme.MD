@@ -88,6 +88,12 @@ sudo systemctl enable smartmeter.service
 sudo systemctl start smartmeter.service
 ```
 
+check if service is running:
+
+```
+systemctl list-units --type=service
+```
+
 ### troubleshooting postgres
 
 Check if pg_lsclusters is running or down.
