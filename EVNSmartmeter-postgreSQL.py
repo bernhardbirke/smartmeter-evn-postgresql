@@ -21,10 +21,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# get the  logging level from .env file
+log_level = os.getenv("LOG_LEVEL")
+
+loggingFile = (
+    os.path.dirname(os.path.realpath(__file__)) + "/EVNSmartmeter-postgreSQL.log"
+)
+
 # config of logging module (DEBUG / INFO / WARNING / ERROR / CRITICAL)
 logging.basicConfig(
-    level=logging.DEBUG,
-    filename="EVNSmartmeter-postgreSQL.log",
+    level=logging.log_level,
+    filename=loggingFile,
     encoding="utf-8",
     filemode="a",
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -112,7 +119,7 @@ while True:
     # check if elapsed time exceeds 10 minutes (600000ms) and exit the program if true
     if elapsed_time > 600000:
         logging.exception(
-            f"No data was added to the postgresQL smartmeter database within the last 10 minutes"
+            f"No data was added to the postgresQL smartmeter database during the last 10 minutes"
         )
         sys.exit(1)
 
@@ -261,3 +268,6 @@ while True:
             print("Fehler: ", format(err))
             logging.exception(f"{err}")
             continue
+
+    # wait 30 seconds before restarting the loop.
+    sleep(30)

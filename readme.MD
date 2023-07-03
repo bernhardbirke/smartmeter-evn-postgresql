@@ -6,6 +6,36 @@ pip install python-dotenv
 pip install psycopg2 or pip install psycopg2-binary
 '''
 
+## Environment Variables
+
+### Configuration for reading the data from the smartmeter
+
+A Config.json file is necessary in the same directory as `EVNSmartmeter-postgreSQL.py`.
+
+### Environment Variables
+
+Create a `.env` file in the same directory as `EVNSmartmeter-postgreSQL.py` with the following contents:
+
+'''
+
+# EVN Schlüssel (as received by the EVN)
+
+EVN_SCHLUESSEL = 4283YOUR3948EVN928175KEY2884
+
+# lEVEL of Logfile (DEBUG / INFO / WARNING / ERROR / CRITICAL).
+
+LOG_LEVEL = WARNING
+'''
+
+### Database
+
+A database.ini file has to be added to the working directory containing the following specifications:
+[postgresql]
+host=localhost
+database=smartmeter
+user=name_of_user
+password=Abcd1234
+
 ## postgreSQL
 
 ### Initialize
