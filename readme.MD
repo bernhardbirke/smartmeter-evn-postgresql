@@ -98,7 +98,8 @@ Let’s create a file called
 [Unit]
 Description= smartmeter evn postgresql service
 After=multi-user.target
-StartLimitIntervalSec=0
+
+
 [Service]
 Type=simple
 Restart=always

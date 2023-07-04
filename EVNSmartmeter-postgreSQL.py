@@ -30,7 +30,7 @@ loggingFile = (
 
 # config of logging module (DEBUG / INFO / WARNING / ERROR / CRITICAL)
 logging.basicConfig(
-    level=logging.log_level,
+    level=logging.WARNING,
     filename=loggingFile,
     encoding="utf-8",
     filemode="a",
