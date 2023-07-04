@@ -1,8 +1,11 @@
 #!/usr/bin/python
+import os
 from configparser import ConfigParser
 
+databaseFile = os.path.dirname(os.path.realpath(__file__)) + "database.ini"
 
-def config(filename='database.ini', section='postgresql'):
+
+def config(filename=databaseFile, section="postgresql"):
     """define the details of a database connection based on database.ini"""
     # create a parser
     parser = ConfigParser()
@@ -17,6 +20,7 @@ def config(filename='database.ini', section='postgresql'):
             db[param[0]] = param[1]
     else:
         raise Exception(
-            'Section {0} not found in the {1} file'.format(section, filename))
+            "Section {0} not found in the {1} file".format(section, filename)
+        )
 
     return db

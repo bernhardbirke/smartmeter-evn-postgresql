@@ -105,6 +105,7 @@ Restart=always
 RestartSec=1
 User=raspi #your user name
 ExecStart=/usr/bin/python3 /whole/path/to/script/EVNSmartmeter-postgreSQL.py
+WorkingDirectory=/whole/path/to/script/
 
 [Install]
 WantedBy=multi-user.target
