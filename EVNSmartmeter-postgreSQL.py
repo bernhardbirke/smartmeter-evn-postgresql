@@ -30,7 +30,7 @@ loggingFile = (
 
 # config of logging module (DEBUG / INFO / WARNING / ERROR / CRITICAL)
 logging.basicConfig(
-    level=logging.WARNING,
+    level=logging.INFO,
     filename=loggingFile,
     encoding="utf-8",
     filemode="a",
@@ -108,20 +108,29 @@ def evn_decrypt(frame, key, systemTitel, frameCounter):
     return cipher.decrypt(frame).hex()
 
 
-# set a start value for last_time_saved
+# set a start value for last_time_saved in seconds
 last_time_saved = time.time()
+# set a starting time for the application in seconds
+time_application_started = time.time()
+logging.info(f"Application started at {time.localtime(time_application_started)}")
 
 while True:
     # save the current_time.
     current_time = time.time()
-    # elapsed time in ms since the last entry in postgresQL smartmeter database
+    # elapsed time in s since the last entry in postgresQL smartmeter database
     elapsed_time = current_time - last_time_saved
-    # check if elapsed time exceeds 10 minutes (600000ms) and exit the program if true
-    if elapsed_time > 600000:
+    # check if elapsed time exceeds 10 minutes (600s) and exit the program if true
+    if elapsed_time > 600:
         logging.exception(
             f"No data was added to the postgresQL smartmeter database during the last 10 minutes"
         )
         sys.exit(1)
+    # elapsed time since the application was started in seconds
+    elapsed_time_start = current_time - time_application_started
+    # check if elapsed time exceeds 2 hours (7200s) and exit the program if true
+    if elapsed_time_start > 7200:
+        logging.info(f"Application was running for 2 hours. Please restart.")
+        sys.exit(0)
 
     # read data
     daten = ser.read(size=282).hex()
@@ -269,5 +278,5 @@ while True:
             logging.exception(f"{err}")
             continue
 
-    # wait 30 seconds before restarting the loop.
-    sleep(30)
+    # wait 29 seconds before restarting the loop.
+    sleep(29)
