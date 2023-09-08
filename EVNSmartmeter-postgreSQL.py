@@ -108,30 +108,9 @@ def evn_decrypt(frame, key, systemTitel, frameCounter):
     return cipher.decrypt(frame).hex()
 
 
-# set a start value for last_time_saved in seconds
-last_time_saved = time.time()
-# set a starting time for the application in seconds
-time_application_started = time.time()
-logging.info(f"Application started at {time.localtime(time_application_started)}")
+logging.info(f"Application started")
 
 while True:
-    # save the current_time.
-    current_time = time.time()
-    # elapsed time in s since the last entry in postgresQL smartmeter database
-    elapsed_time = current_time - last_time_saved
-    # check if elapsed time exceeds 10 minutes (600s) and exit the program if true
-    if elapsed_time > 600:
-        logging.exception(
-            f"No data was added to the postgresQL smartmeter database during the last 10 minutes"
-        )
-        sys.exit(1)
-    # elapsed time since the application was started in seconds
-    elapsed_time_start = current_time - time_application_started
-    # check if elapsed time exceeds 2 hours (7200s) and exit the program if true
-    if elapsed_time_start > 7200:
-        logging.info(f"Application was running for 2 hours. Please restart.")
-        sys.exit(0)
-
     # read data
     daten = ser.read(size=282).hex()
     mbusstart = daten[0:8]
@@ -271,8 +250,7 @@ while True:
                 sys.exit(1)
             else:
                 logging.info(f"data_id: {data_id} was added to postgresQL Smartmeter")
-                # save the current time in ms
-                last_time_saved = time.time()
+
         except BaseException as err:
             print("Fehler: ", format(err))
             logging.exception(f"{err}")
