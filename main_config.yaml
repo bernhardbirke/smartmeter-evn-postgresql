@@ -1,0 +1,5 @@
+#config file for smartmeter data reader
+port: "/dev/ttyUSB0"
+baudrate: 2400
+printValue: True
+usePostgres: True

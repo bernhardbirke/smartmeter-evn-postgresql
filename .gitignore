@@ -2,10 +2,12 @@
 smartmeter-evn-postgrSQL.code-workspace
 database.ini
 smartmeter.service
-EVNSmartmeter-postgreSQL_alt.py
+test_config.py
 
 #specific folders to ignore
 /evn/
+/errors_20231001/
+/unused/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
