@@ -25,6 +25,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
-
 smartmeter_postg = SmartmeterToPostgres(config, client)
-smartmeter_postg.run()
+
+if __name__ == "__main__":
+    smartmeter_postg.run()

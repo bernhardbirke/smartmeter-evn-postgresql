@@ -1,4 +1,12 @@
+## Read Smartmeter Data (Sagemcom Drehstromzähler T210-D) and store in a database.
+
+The script collects a encrypted hex string emmited by the smartmeter via a MBUS Adapter.
+The hex string is then decrypted using a personal encryption key and the data extracted via XML.
+Finally the data is saved to a defined postgreSQL database.
+
 ## Necessary additional Modules
+
+Please refer to `requirements.txt`
 
 pip install python-dotenv
 
@@ -10,31 +18,33 @@ pip install psycopg2 or pip install psycopg2-binary
 
 ### Configuration for reading the data from the smartmeter
 
-A Config.json file is necessary in the same directory as `EVNSmartmeter-postgreSQL.py`.
+A main_config.yaml file is necessary in the root directory of the project.
 
 ### Environment Variables
 
-Create a `.env` file in the same directory as `EVNSmartmeter-postgreSQL.py` with the following contents:
+Create a `.env` file in the root directory of the project with the following contents:
 
 '''
-
-# EVN Schlüssel (as received by the EVN)
+#EVN Schlüssel (as received by the EVN):
 
 EVN_SCHLUESSEL = 4283YOUR3948EVN928175KEY2884
 
-# lEVEL of Logfile (DEBUG / INFO / WARNING / ERROR / CRITICAL).
-
-LOG_LEVEL = WARNING
 '''
 
 ### Database
 
-A database.ini file has to be added to the working directory containing the following specifications:
+A database.ini file has to be added to the root of the working directory containing the following specifications:
 [postgresql]
 host=localhost
 database=smartmeter
 user=name_of_user
 password=Abcd1234
+
+### Necessary hardware to connect to the smartmeter
+
+This python script is based on Michael Reitbauers work.
+Further explanations can be found here:
+`https://www.michaelreitbauer.at/sagemcom-t210-d-auslesen-smart-meter-evn/`
 
 ## postgreSQL
 
@@ -74,22 +84,16 @@ database=smartmeter
 user=name_of_user
 password=Abcd1234
 
-The config.py file loads this information, which is then used in postgresl_tasks.py to establish a connection to the database.
-
-### Connect to the smartmeter and read the data
-
-The python routine to connect to the smartmeter and read the data is based on Michael Reitbauers work.
-Further explanations can be found here:
-https://www.michaelreitbauer.at/sagemcom-t210-d-auslesen-smart-meter-evn/
+The config.py file loads this information, which is then used in postgresql_tasks.py to establish a connection to the database.
 
 ### start the file
 
-using: python3 EVNSmartmeter-postgreSQL.py in the project directory.
+using: `python /src/smartmeter/__main__.py` in the project root directory.
 
 ### run the python file as a service
 
-tutorial from
-https://medium.com/@benmorel/creating-a-linux-service-with-systemd-611b5c8b91d6
+for further explanations please refer to:
+`https://medium.com/@benmorel/creating-a-linux-service-with-systemd-611b5c8b91d6`
 
 Let’s create a file called
 `/etc/systemd/system/smartmeter.service:`
@@ -105,8 +109,8 @@ Type=simple
 Restart=always
 RestartSec=1
 User=raspi #your user name
-ExecStart=/usr/bin/python3 /whole/path/to/script/EVNSmartmeter-postgreSQL.py
-WorkingDirectory=/whole/path/to/script/
+ExecStart=/usr/bin/python3 /whole/path/to/script/src/smartmeter/__main__.py
+WorkingDirectory=/whole/path/to/script/src/smartmeter
 
 [Install]
 WantedBy=multi-user.target
@@ -126,7 +130,7 @@ check if service is running:
 systemctl list-units --type=service
 ```
 
-### troubleshooting postgres
+#### sidenote: troubleshooting postgres
 
 Check if pg_lsclusters is running or down.
 
