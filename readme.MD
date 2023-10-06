@@ -88,7 +88,7 @@ The config.py file loads this information, which is then used in postgresql_task
 
 ### start the file
 
-using: `python /src/smartmeter/__main__.py` in the project root directory.
+using: `python -m src.smartmeter.__main__` in the project root directory.
 
 ### run the python file as a service
 

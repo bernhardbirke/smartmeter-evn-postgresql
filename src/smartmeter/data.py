@@ -191,7 +191,7 @@ class SmartmeterToPostgres:
             # extract data
             self.translate_dlms(apdu)
 
-            if self.yaml_config["printValue"]:
+            if self.config_yaml["printValue"]:
                 now = datetime.now()
                 print(
                     "\n\t\t*** KUNDENSCHNITTSTELLE ***\n\nOBIS Code\tBezeichnung\t\t\t Wert"
@@ -249,7 +249,7 @@ class SmartmeterToPostgres:
                 )
 
             # save data to PostgreSQL
-            if self.yaml_config["usePostgres"]:
+            if self.config_yaml["usePostgres"]:
                 try:
                     data_id = self.client.insert_smartmeter(
                         self.data["WirkenergieP"],
