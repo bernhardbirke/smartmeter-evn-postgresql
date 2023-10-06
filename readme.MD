@@ -6,91 +6,99 @@ Finally the data is saved to a defined postgreSQL database.
 
 ## Necessary additional Modules
 
-Please refer to `requirements.txt`
+For all necessary modules please refer to `requirements.txt`
 
+```
 pip install python-dotenv
 
-'''
-pip install psycopg2 or pip install psycopg2-binary
-'''
+pip install psycopg2
+or
+pip install psycopg2-binary
+```
 
 ## Environment Variables
 
 ### Configuration for reading the data from the smartmeter
 
-A main_config.yaml file is necessary in the root directory of the project.
+A `main_config.yaml` file is necessary in the root directory of the project.
 
 ### Environment Variables
 
 Create a `.env` file in the root directory of the project with the following contents:
 
-'''
+```
 #EVN Schlüssel (as received by the EVN):
 
 EVN_SCHLUESSEL = 4283YOUR3948EVN928175KEY2884
 
-'''
+```
 
 ### Database
 
 A database.ini file has to be added to the root of the working directory containing the following specifications:
+
+```
 [postgresql]
 host=localhost
 database=smartmeter
 user=name_of_user
 password=Abcd1234
+```
 
 ### Necessary hardware to connect to the smartmeter
 
 This python script is based on Michael Reitbauers work.
-Further explanations can be found here:
-`https://www.michaelreitbauer.at/sagemcom-t210-d-auslesen-smart-meter-evn/`
+Further explanations can be found on [Michael Reitbauers Website](https://www.michaelreitbauer.at/sagemcom-t210-d-auslesen-smart-meter-evn/)
 
-## postgreSQL
+## PostgreSQL
 
 ### Initialize
 
-Install PostgreSQL on Windows:
-https://www.postgresqltutorial.com/postgresql-getting-started/install-postgresql/
+[Install PostgreSQL on Windows](https://www.postgresqltutorial.com/postgresql-getting-started/install-postgresql/)
 
-Install PostgreSQL on Linux:
-https://www.postgresqltutorial.com/postgresql-getting-started/install-postgresql-linux/
+[Install PostgreSQL on Linux](https://www.postgresqltutorial.com/postgresql-getting-started/install-postgresql-linux/)
 
 ### Create a new database
 
 Log in to the PostgreSQL database server using any client tool such as pgAdmin or psql.
 
 Create a postgreSQL User using the corresponding commands:
+
+```
 CREATE ROLE name_of_user
 CREATEDB
 LOGIN
 PASSWORD 'Abcd1234';
+```
 
 use the following statement to create a new database named smartmeter in the PostgreSQL database server:
 
-CREATE DATABASE smartmeter;
+``REATE DATABASE smartmeter;`
 
 ### Connect to your database
 
 switch over to the postgres role using:
-sudo -i -u postgres
+`sudo -i -u postgres`
 
-then start psql.
+then start `psql`.
 
-A database.ini file has to be added to the working directory containing the following specifications:
+A `database.ini` file has to be added to the working directory containing the following specifications:
+
+```
 [postgresql]
 host=localhost
 database=smartmeter
 user=name_of_user
 password=Abcd1234
+```
 
-The config.py file loads this information, which is then used in postgresql_tasks.py to establish a connection to the database.
+The `config.py` file loads this information, which is then used in `postgresql_tasks.py` to establish a connection to the database.
 
-### start the file
+### Start the file
 
 using: `python -m src.smartmeter.__main__` in the project root directory.
 
-### run the python file as a service
+### Run the python file as a service
 
 for further explanations please refer to:
 `https://medium.com/@benmorel/creating-a-linux-service-with-systemd-611b5c8b91d6`
