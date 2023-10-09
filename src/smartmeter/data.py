@@ -276,5 +276,8 @@ class SmartmeterToPostgres:
                 except BaseException as err:
                     logging.exception(f"{err}")
 
-                # wait 29 seconds before restarting the loop.
-                sleep(29)
+            # wait 29 seconds before restarting the loop.
+            self.ser.flushOutput()
+            self.ser.close()
+            self.ser.open()
+            sleep(29)
