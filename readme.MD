@@ -1,6 +1,6 @@
 ## Read Smartmeter Data (Sagemcom Drehstromzähler T210-D) and store in a database.
 
-The script collects a encrypted hex string emmited by the smartmeter via a MBUS Adapter.
+The script collects an encrypted hex string emmited by the smartmeter via a MBUS Adapter.
 The hex string is then decrypted using a personal encryption key and the data extracted via XML.
 Finally the data is saved to a defined postgreSQL database.
 
