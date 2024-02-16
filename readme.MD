@@ -73,7 +73,7 @@ PASSWORD 'Abcd1234';
 
 use the following statement to create a new database named smartmeter in the PostgreSQL database server:
 
-``REATE DATABASE smartmeter;`
+``CREATE DATABASE smartmeter;`
 
 ### Connect to your database
 
@@ -111,18 +111,14 @@ Let’s create a file called
 Description= smartmeter evn postgresql service
 After=multi-user.target
 
-
 [Service]
-Type=simple
+User=raspi5000
+ExecStart=/bin/bash -c 'cd /home/rasperrypi/path/to/script/smartmeter-evn-postgresql/ && python -m src.smartmeter.__main__'
 Restart=always
 RestartSec=1
-User=raspi #your user name
-ExecStart=/usr/bin/python3 /whole/path/to/script/src/smartmeter/__main__.py
-WorkingDirectory=/whole/path/to/script/src/smartmeter
 
 [Install]
 WantedBy=multi-user.target
-
 ```
 
 #### enable the service via command line
