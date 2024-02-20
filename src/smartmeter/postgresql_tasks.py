@@ -61,7 +61,7 @@ class PostgresTasks:
     ) -> int:
         """insert a new data row into the smartmeter table"""
         sql = """INSERT INTO smartmeter(time, wirkenergie_p, wirkenergie_n, momentanleistung_p, momentanleistung_n, spannung_l1, spannung_l2, spannung_l3, strom_l1, strom_l2, strom_l3, leistungsfaktor)
-            VALUES(NOW()::TIMESTAMP, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING data_id;"""
+            VALUES((NOW() AT TIME ZONE 'UTC'), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING data_id;"""
         conn = None
         data_id = None
         try:
